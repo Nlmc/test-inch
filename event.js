@@ -42,37 +42,37 @@ function availabilities(fromDate, toDate) {
   return compare(availableEvents, unavailableEvents, dateOfRecurring);
   }
 
-  function compare(availableEvents, unavailableEvents, dateOfRecurring){
-    var results = ['month', 'day', []];
-    var shortcut = results[2];
+function compare(availableEvents, unavailableEvents, dateOfRecurring){
+  var results = ['month', 'day', []];
+  var shortcut = results[2];
 
-    for (var i = 0; i < availableEvents.length; i++) {
-      var event = availableEvents[i];
+  for (var i = 0; i < availableEvents.length; i++) {
+    var event = availableEvents[i];
 
-      for (var k = 0; k < unavailableEvents.length; k++) {
-        var unavailable = unavailableEvents[k];
+    for (var k = 0; k < unavailableEvents.length; k++) {
+      var unavailable = unavailableEvents[k];
 
-        if(moment(event.startDate).day() == moment(unavailable.startDate).day()){
-          var currHour = moment(event.startDate);
-          var endHour = moment(event.endDate);
+      if(moment(event.startDate).day() == moment(unavailable.startDate).day()){
+        var currHour = moment(event.startDate);
+        var endHour = moment(event.endDate);
 
-          while (currHour.isBefore(endHour)){
-            if (currHour.format("HH:mm") == moment(unavailable.startDate).format("HH:mm")) {
-              var swap = [moment(unavailable.endDate).hour(), moment(unavailable.endDate).minutes()];
-              currHour.hour(swap[0]);
-              currHour.minutes(swap[1]);
-            } else {
-              shortcut.push(currHour.format("HH:mm"));
-              currHour = currHour.add(0.5, 'h');
-              }
+        while (currHour.isBefore(endHour)){
+          if (currHour.format("HH:mm") == moment(unavailable.startDate).format("HH:mm")) {
+            var swap = [moment(unavailable.endDate).hour(), moment(unavailable.endDate).minutes()];
+            currHour.hour(swap[0]);
+            currHour.minutes(swap[1]);
+          } else {
+            shortcut.push(currHour.format("HH:mm"));
+            currHour = currHour.add(0.5, 'h');
             }
-            results[0] = moment(dateOfRecurring).format("MMMM");
-            results[1] = moment(dateOfRecurring).date();
           }
+          results[0] = moment(dateOfRecurring).format("MMMM");
+          results[1] = moment(dateOfRecurring).date();
         }
       }
-      return results;
-  }
+    }
+    return results;
+}
 
   // compare available and unavailable events to get final availabilities
 
