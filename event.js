@@ -14,8 +14,9 @@ var Event = function(opening, recurring, startDate, endDate){
 };
 
 Event.prototype.availabilities = function(fromDate, toDate){
-  availabilities(fromDate, toDate);
-  return 0;//Something awesome;
+  var dateArray = availabilities(fromDate, toDate);
+  display(dateArray);
+  return dateArray;//Something awesome;
 };
 
 function availabilities(fromDate, toDate) {
@@ -28,46 +29,49 @@ function availabilities(fromDate, toDate) {
     var event = eventList[i];
     if (
         event.startDate >= fromDate && event.endDate <= toDate
-        || eventIsRecurringAndInDateInterval(event, fromDate, toDate)
+        || dateOfRecurring !== false
       ) {
         if (event.opening) {
+          var dateOfRecurring = eventIsRecurringAndInDateInterval(event, fromDate, toDate);
           availableEvents.push(event);
         } else {
           unavailableEvents.push(event);
         }
     }
   }
+  return compare(availableEvents, unavailableEvents, dateOfRecurring);
+  }
 
-  var results = [];
-  var begin;
-  var end;
+  function compare(availableEvents, unavailableEvents, dateOfRecurring){
+    var results = ['month', 'day', []];
+    var shortcut = results[2];
 
-  for (var i = 0; i < availableEvents.length; i++) {
-    var event = availableEvents[i];
+    for (var i = 0; i < availableEvents.length; i++) {
+      var event = availableEvents[i];
 
-    for (var k = 0; k < unavailableEvents.length; k++) {
-      var unavailable = unavailableEvents[k];
-      console.log(unavailable);
-      if(moment(event.startDate).day() == moment(unavailable.startDate).day()){
-        var currHour = moment(event.startDate);
-        var endHour = moment(event.endDate);
-    
-        while (currHour < endHour){
-          if (currHour.format("HH:mm") == moment(unavailable.startDate).format("HH:mm")) {
-            currHour = unavailable.endDate;
-            console.log('une fois?');
-          } else {
-            results.push(currHour.format("HH:mm"));
-            console.log('before', currHour);
-            currHour = currHour.add(0.5, 'h');
-            console.log('after', currHour);
+      for (var k = 0; k < unavailableEvents.length; k++) {
+        var unavailable = unavailableEvents[k];
+
+        if(moment(event.startDate).day() == moment(unavailable.startDate).day()){
+          var currHour = moment(event.startDate);
+          var endHour = moment(event.endDate);
+
+          while (currHour.isBefore(endHour)){
+            if (currHour.format("HH:mm") == moment(unavailable.startDate).format("HH:mm")) {
+              var swap = [moment(unavailable.endDate).hour(), moment(unavailable.endDate).minutes()];
+              currHour.hour(swap[0]);
+              currHour.minutes(swap[1]);
+            } else {
+              shortcut.push(currHour.format("HH:mm"));
+              currHour = currHour.add(0.5, 'h');
+              }
             }
+            results[0] = moment(dateOfRecurring).format("MMMM");
+            results[1] = moment(dateOfRecurring).date();
           }
         }
       }
-    }
-    console.log('-------', results);
-    return 'wow';
+      return results;
   }
 
   // compare available and unavailable events to get final availabilities
@@ -89,11 +93,28 @@ function eventIsRecurringAndInDateInterval(event, fromDate, toDate) {
 
     while (moment(eventIterated).isBefore(toDate)) {
       if (eventIterated >= fromDate) {
+        var realDate = eventIterated;
         inInterval = true;
       }
       eventIterated = moment(eventIterated).add(7, 'days');
     }
   }
-  return inInterval;
+  if (inInterval === true) {
+    return realDate;
+  }  else {
+    return inInterval;
+  }
+}
+
+
+function display(dateArray) {
+  var prevString = "i'm available from ";
+  var endString = "\nI'm not available any other time !";
+  var month = dateArray[0];
+  var date = dateArray[1];
+  var hours = dateArray[2];
+  hours = hours.join(', ');
+  var finalString = prevString + month + " " + date +  "th, at " + hours + endString;
+  console.log(finalString);
 }
 module.exports = Event;
