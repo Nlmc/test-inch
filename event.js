@@ -16,7 +16,7 @@ var Event = function(opening, recurring, startDate, endDate){
 Event.prototype.availabilities = function(fromDate, toDate){
   var dateArray = availabilities(fromDate, toDate);
   display(dateArray);
-  return dateArray;//Something awesome;
+  return dateArray;
 };
 
 function availabilities(fromDate, toDate) {
