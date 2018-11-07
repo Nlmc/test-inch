@@ -3,6 +3,8 @@ moment().format();
 // moment().utcOffset(120);
 
 var eventList = [];
+var recurrentEventList = [];
+var unavailableEvents = [];
 
 var Event = function(opening, recurring, startDate, endDate){
   this.opening = opening;
@@ -10,37 +12,23 @@ var Event = function(opening, recurring, startDate, endDate){
   this.startDate = startDate;
   this.endDate = endDate;
 
-  eventList.push(this);
+  if (this.opening === false) {
+    unavailableEvents.push(this);
+  }
+  else {
+    eventList.push(this);
+  }
 };
 
 Event.prototype.availabilities = function(fromDate, toDate){
   var dateArray = availabilities(fromDate, toDate);
-  display(dateArray);
   return dateArray;
 };
 
-function availabilities(fromDate, toDate) {
-  var availableEvents = [];
-  var unavailableEvents = [];
-  // for each event in eventList, check that is happens during given Date interval
-  // and sort events in two groups based on availability (opening window or busy window)
-  for (var i = 0; i < eventList.length; i++) {
-    // find
-    var event = eventList[i];
-    if (
-        event.startDate >= fromDate && event.endDate <= toDate
-        || dateOfRecurring !== false
-      ) {
-        if (event.opening) {
-          var dateOfRecurring = eventIsRecurringAndInDateInterval(event, fromDate, toDate);
-          availableEvents.push(event);
-        } else {
-          unavailableEvents.push(event);
-        }
-    }
-  }
-  return compare(availableEvents, unavailableEvents, dateOfRecurring);
-  }
+function availabilities(fromDate, toDate){
+  console.log('eventList : ', eventList, '\n unavailableEvents : ', unavailableEvents);
+}
+
 
 function compare(availableEvents, unavailableEvents, dateOfRecurring){
   var results = ['month', 'day', []];
@@ -86,35 +74,5 @@ function compare(availableEvents, unavailableEvents, dateOfRecurring){
  * @param {Date} fromDate - Start of Date interval to check for
  * @param {Date} toDate - End of Date interval to check for
  */
-function eventIsRecurringAndInDateInterval(event, fromDate, toDate) {
-  var inInterval = false;
-  if (event.recurring && event.startDate < fromDate) {
-    var eventIterated = moment(event.startDate);
 
-    while (moment(eventIterated).isBefore(toDate)) {
-      if (eventIterated >= fromDate) {
-        var realDate = eventIterated;
-        inInterval = true;
-      }
-      eventIterated = moment(eventIterated).add(7, 'days');
-    }
-  }
-  if (inInterval === true) {
-    return realDate;
-  }  else {
-    return inInterval;
-  }
-}
-
-
-function display(dateArray) {
-  var prevString = "i'm available from ";
-  var endString = "\nI'm not available any other time !";
-  var month = dateArray[0];
-  var date = dateArray[1];
-  var hours = dateArray[2];
-  hours = hours.join(', ');
-  var finalString = prevString + month + " " + date +  "th, at " + hours + endString;
-  console.log(finalString);
-}
 module.exports = Event;
