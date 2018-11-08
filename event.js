@@ -23,15 +23,31 @@ var Event = function(opening, recurring, startDate, endDate){
 };
 
 Event.prototype.availabilities = function(fromDate, toDate){
-  var dateArray = availabilities(fromDate, toDate);
   var recurringEvents = getRecurrentEvents(fromDate, toDate);
-  var filter();
-
-  return dateArray;
+  var unavailableInInterval = filterUnavailable(unavailableEvents, fromDate, toDate);
+  var availableInInterval = filterAvailable(eventList, fromDate, toDate);
+  // console.log('eventList ', eventList, '\n recurrentEventList', recurrentEventList, '\n unavailableEvents : ', unavailableEvents);
+  var dateArray = availabilities(recurringEvents, availableInInterval, unavailableInInterval, fromDate, toDate);
+  return 1;
 };
 
-function availabilities(fromDate, toDate){
-  return 0;
+function availabilities(recurringEvents, availableInInterval, unavailableInInterval, fromDate, toDate){
+
+  var arr = [];
+
+  for (var i = 0; i < unavailableInInterval.length; i++) {
+    var unavailable = unavailableInInterval[i];
+    if (recurringEvents[moment(unavailable).isoWeekday()]) {
+      // calculer les heures dispo
+    } else {
+      for (var i = 0; i < availableInInterval.length; i++) {
+        if (moment(availableInInterval[i]).isSame(unavailable, 'day')) {
+          //calculer les heures dispo
+        }
+      }
+    }
+  }
+  return arr;
 }
 
 // Store the day of the week and the hour
@@ -51,10 +67,33 @@ function getRecurrentEvents(){
   return recurrentDays;
 }
 
-// check each days of the intervals and compare with recurrents opening events and
-// unavailable events
-function checkIfAvailable(recurrentDays, fromDate, toDate){
+// get all unavailable events for the interval given
+function filterUnavailable(unavailableEvents, fromDate, toDate){
 
+  var inInterval = [];
+
+  for (var i = 0; i < unavailableEvents.length; i++) {
+    var event = unavailableEvents[i];
+    if (event.startDate >= fromDate && event.endDate < toDate ) {
+      inInterval.push(event);
+    }
+  }
+  console.log(inInterval);
+  return inInterval;
+}
+
+function filterAvailable(eventList, fromDate, toDate){
+
+  var inInterval = [];
+
+  for (var i = 0; i < eventList.length; i++) {
+    var event = eventList[i];
+    if (event.startDate >= fromDate && event.endDate < toDate ) {
+      inInterval.push(event);
+    }
+  }
+  console.log(inInterval);
+  return inInterval;
 }
 
 module.exports = Event;
