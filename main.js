@@ -11,8 +11,8 @@ startDate = new Date(2018,6,8,11,30); // June 8th 11:30
 endDate = new Date(2018,6,8,12,30); // June 8th 12:30
 new Event(false, false, startDate, endDate); // intervention scheduled
 
-startDate = new Date(2018,6,3,11,30); //Test
-endDate = new Date(2018,6,3,12,30); //
+startDate = new Date(2018,6,11,11,30); //Test
+endDate = new Date(2018,6,11,12,30); //
 new Event(false, false, startDate, endDate); //
 
 var fromDate = new Date(2018,6,4,10,00);

@@ -26,23 +26,28 @@ Event.prototype.availabilities = function(fromDate, toDate){
   var recurringEvents = getRecurrentEvents(fromDate, toDate);
   var unavailableInInterval = filterUnavailable(unavailableEvents, fromDate, toDate);
   var availableInInterval = filterAvailable(eventList, fromDate, toDate);
-  // console.log('eventList ', eventList, '\n recurrentEventList', recurrentEventList, '\n unavailableEvents : ', unavailableEvents);
+  console.log(unavailableInInterval, availableInInterval);
   var dateArray = availabilities(recurringEvents, availableInInterval, unavailableInInterval, fromDate, toDate);
-  return 1;
+  return dateArray;
 };
 
 function availabilities(recurringEvents, availableInInterval, unavailableInInterval, fromDate, toDate){
 
   var arr = [];
-
   for (var i = 0; i < unavailableInInterval.length; i++) {
+
     var unavailable = unavailableInInterval[i];
-    if (recurringEvents[moment(unavailable).isoWeekday()]) {
-      // calculer les heures dispo
+    var day = moment(unavailable).isoWeekday();
+    console.log(day);
+
+    if (recurringEvents[day]) {
+      var result = hours(event, unavailable);
+      arr.push(result);
     } else {
       for (var i = 0; i < availableInInterval.length; i++) {
         if (moment(availableInInterval[i]).isSame(unavailable, 'day')) {
-          //calculer les heures dispo
+          var result = hours(event, unavailable);
+          arr.push(result);
         }
       }
     }
@@ -63,7 +68,6 @@ function getRecurrentEvents(){
     var day = begin.isoWeekday();
     recurrentDays[day] = [begin.format("HH:mm"), end.format("HH:mm")];
   }
-  console.log(recurrentDays);
   return recurrentDays;
 }
 
@@ -78,7 +82,6 @@ function filterUnavailable(unavailableEvents, fromDate, toDate){
       inInterval.push(event);
     }
   }
-  console.log(inInterval);
   return inInterval;
 }
 
@@ -92,8 +95,31 @@ function filterAvailable(eventList, fromDate, toDate){
       inInterval.push(event);
     }
   }
-  console.log(inInterval);
   return inInterval;
+}
+
+
+function hours(event, unavailable) {
+  var results = ['month', 'day', []];
+
+  var currHour = moment(event.startDate);
+  var endHour = moment(event.endDate);
+
+  while (currHour.isBefore(endHour)){
+    if (currHour.format("HH:mm") == unavailable[0][0]) {
+
+      var swap = [moment(unavailable.endDate).hour(), moment(unavailable.endDate).minutes()];
+      currHour.hour(swap[0]);
+      currHour.minutes(swap[1]);
+    } else {
+      shortcut.push(currHour.format("HH:mm"));
+      currHour = currHour.add(0.5, 'h');
+    }
+  }
+  results[0] = moment(dateOfRecurring).format("MMMM");
+  results[1] = moment(dateOfRecurring).date();
+
+  return results;
 }
 
 module.exports = Event;
