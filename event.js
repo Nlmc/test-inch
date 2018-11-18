@@ -35,22 +35,23 @@ function availabilities(recurringEvents, availableInInterval, unavailableInInter
 
   var arr = [];
   for (var i = 0; i < unavailableInInterval.length; i++) {
-
+    console.log(i, unavailableInInterval.length);
     var unavailable = unavailableInInterval[i];
     var day = moment(unavailable).isoWeekday();
-    console.log(day);
+    console.log(day, 'day');
 
     if (recurringEvents[day]) {
       var result = hours(event, unavailable);
       arr.push(result);
-    } else {
-      for (var i = 0; i < availableInInterval.length; i++) {
-        if (moment(availableInInterval[i]).isSame(unavailable, 'day')) {
-          var result = hours(event, unavailable);
-          arr.push(result);
-        }
-      }
-    }
+     } 
+    //else {
+    //   for (var i = 0; i < availableInInterval.length; i++) {
+    //     if (moment(availableInInterval[i]).isSame(unavailable, 'day')) {
+    //       var result = hours(event, unavailable);
+    //       arr.push(result);
+    //     }
+    //   }
+    // }
   }
   return arr;
 }
@@ -108,7 +109,7 @@ function hours(event, unavailable) {
   while (currHour.isBefore(endHour)){
     if (currHour.format("HH:mm") == unavailable[0][0]) {
 
-      var swap = [moment(unavailable.endDate).hour(), moment(unavailable.endDate).minutes()];
+      var swap = [moment(unavailable[0][0]).hour(), moment(unavailable).minutes()];// ré adapter au nouvel objety unavailable
       currHour.hour(swap[0]);
       currHour.minutes(swap[1]);
     } else {
