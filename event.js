@@ -26,32 +26,34 @@ Event.prototype.availabilities = function(fromDate, toDate){
   var recurringEvents = getRecurrentEvents(fromDate, toDate);
   var unavailableInInterval = filterUnavailable(unavailableEvents, fromDate, toDate);
   var availableInInterval = filterAvailable(eventList, fromDate, toDate);
-  console.log(unavailableInInterval, availableInInterval);
   var dateArray = availabilities(recurringEvents, availableInInterval, unavailableInInterval, fromDate, toDate);
-  return dateArray;
+  // console.log(dateArray);
 };
 
 function availabilities(recurringEvents, availableInInterval, unavailableInInterval, fromDate, toDate){
 
   var arr = [];
   for (var i = 0; i < unavailableInInterval.length; i++) {
-    console.log(i, unavailableInInterval.length);
+    console.log(unavailableInInterval[i], 'before \n');
     var unavailable = unavailableInInterval[i];
-    var day = moment(unavailable).isoWeekday();
-    console.log(day, 'day');
+    var day = moment(unavailable).subtract(1, 'months').isoWeekday();
+
+    console.log(unavailable, 'after ', day);
+    console.log(moment(unavailable).format('MMMM'));
+
 
     if (recurringEvents[day]) {
-      var result = hours(event, unavailable);
+      var result = hours(recurringEvents[day][2], unavailable);
       arr.push(result);
-     } 
-    //else {
-    //   for (var i = 0; i < availableInInterval.length; i++) {
-    //     if (moment(availableInInterval[i]).isSame(unavailable, 'day')) {
-    //       var result = hours(event, unavailable);
-    //       arr.push(result);
-    //     }
-    //   }
-    // }
+     }
+    else {
+      for (var k = 0; k < availableInInterval.length; k++) {
+        if (moment(availableInInterval[k]).isSame(unavailable, 'day')) {
+          var result = hours(recurringEvents[day][2], unavailable);
+          arr.push(result);
+        }
+      }
+    }
   }
   return arr;
 }
@@ -67,7 +69,7 @@ function getRecurrentEvents(){
     var end = moment(event.endDate);
 
     var day = begin.isoWeekday();
-    recurrentDays[day] = [begin.format("HH:mm"), end.format("HH:mm")];
+    recurrentDays[day] = [begin.format("HH:mm"), end.format("HH:mm"), event];
   }
   return recurrentDays;
 }
@@ -101,19 +103,23 @@ function filterAvailable(eventList, fromDate, toDate){
 
 
 function hours(event, unavailable) {
-  var results = ['month', 'day', []];
+  // console.log(event, unavailable);
+  var results = ['month' , 'day', []];
 
   var currHour = moment(event.startDate);
   var endHour = moment(event.endDate);
+  var beginUnavailable = moment(unavailable.startDate);
+  var endUnavailable = moment(unavailable.endDate);
 
   while (currHour.isBefore(endHour)){
-    if (currHour.format("HH:mm") == unavailable[0][0]) {
-
-      var swap = [moment(unavailable[0][0]).hour(), moment(unavailable).minutes()];// ré adapter au nouvel objety unavailable
-      currHour.hour(swap[0]);
-      currHour.minutes(swap[1]);
+    // console.log('oui');
+    if (currHour.format("HH:mm") == beginUnavailable ) {
+      // console.log(currHour);
+      currHour.hour(endUnavailable.hour());
+      currHour.minutes(endUnavailable.minutes());
+      // console.log(currHour);
     } else {
-      shortcut.push(currHour.format("HH:mm"));
+      results.push(currHour.format("HH:mm"));
       currHour = currHour.add(0.5, 'h');
     }
   }
